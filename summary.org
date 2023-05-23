@@ -1,0 +1,47 @@
+#+title: Executive Summary
+* Task
+The dataset for the analysis was the biking dataset ([[https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset#][link]]).
+The dataset was first preprocessed and analysed by statistical means and then a regression task predicting =cnt= was completed with different models trained on the data and tested to compare them based on results.
+
+To compare them the metrics of =MTE= (mean squared error) and =R2= were utilized.
+* Tools
+A =python= script was used for the analysis and training.
+The tools used to complete the tasks were the =matplotlib= and =seaborn= packages for data visualization and =sklearn= for the machine learning models, =numpy= for the mathematical tools and =pandas= for the data management and preprocessing.
+* Analysis
+The analysis started by considering each attribute by itself. Inspecting them through statistical means.
+For each attribute the 5 number summary was considered and visualized through boxplots.
+Then the distribution of the most interesting attributed based on the regression task was visualized to better understand the possible skew on the data.
+To better understand the relationships and interplay between the features a heatmap and =seaborn='s =pairplot= were used.
+
+Attribute =instant= was removed as redundant to the task, =dteday= was converted to a simple integer =day= attribute.
+The =weathercond= attribute was found to be highly correlated to the target and during the optimization of the models was converted by one-hot encoding.
+
+* Models
+The regression models tested were:
+- a simple linear model
+- a ridge model
+- a lasso model
+- an elastic net
+- a random forest
+
+They were trained on the same data, first on the day-to-day data and then for the hourly data.
+The features used for the training were most of them except for:
+- =yr=, not important for the task
+- =season=, as the same information is better modeled by =mnth=
+- =registered=, as part of the target of the regression
+- =casual=, same of =registered=
+
+To allow the training the =dteday= attribute was converted to a simple =day= integer attribute.
+
+Then the models were tested again trying to improve performance.
+The following attribute was removed
+- =atemp=, as the same information is modeled by =temp=
+
+The categorical =weathersit= attribute was converted through the =pandas= function =get_dummies= as one-hot encoding creating 3 binary features =weathersit-1=, =weathersit-2=, =weathersit-3=.
+
+Other attributes like =weekday= were tested through one-hot encoding but resulted in a slight lose in performance.
+
+
+* Conclusions
+The *Random Forest* model proved to be the most effective at predicting the target (=cnt=) by far, followed by the simple Linear Model.
+One-hot encoding the =weathersit= attribute improved the prediction slightly reducing =MTE= but mainly in the Linear Model.

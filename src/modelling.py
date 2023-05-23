@@ -114,7 +114,6 @@ def plot_linearity_assumption(y_test, prediction, name, output_dir):
     plt.clf()
 
 def plot_dist_predition(y_test, prediction, name, output_dir):
-    sns.set_theme(style="whitegrid")
     df = pd.DataFrame()
     df['cnt_actual'] = y_test
     df['cnt_predicted'] = prediction
