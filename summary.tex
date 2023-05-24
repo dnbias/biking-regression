@@ -1,0 +1,181 @@
+% Created 2023-05-24 Wed 05:44
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Daniel Biasiotto}
+\date{\today}
+\title{Executive Summary\\\medskip
+\large Project Knowledge Discovery and Data Mining 2022/23}
+\hypersetup{
+ pdfauthor={Daniel Biasiotto},
+ pdftitle={Executive Summary},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.0.60 (Org mode 9.6.1)}, 
+ pdflang={English}}
+\usepackage{biblatex}
+\addbibresource{~/Documents/bib/references/references.bib}
+\begin{document}
+
+\maketitle
+\setcounter{secnumdepth}{0}
+\section{Task}
+\label{sec:org9a4a1b1}
+The dataset for the analysis was the biking dataset (\href{https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset\#}{link}).
+The dataset was first preprocessed and analysed by statistical means and then a regression task predicting \texttt{cnt} was completed with different models trained on the data and tested to compare them based on results.
+
+The metrics of \texttt{MTE} (mean squared error) and \texttt{R2} (coefficient of determination) were used to compare the models.
+\section{Tools}
+\label{sec:orgb6b7020}
+A \texttt{python} script was used for the analysis and training.
+The tools used to complete the tasks were the \texttt{matplotlib} and \texttt{seaborn} packages for data visualization and \texttt{sklearn} for the machine learning models, \texttt{numpy} for the mathematical tools and \texttt{pandas} for the data management and preprocessing.
+\section{Analysis}
+\label{sec:orgb467d2b}
+The data was preprocessed looking for missing values and none were found.
+The outliers in the weather related attributes were also characterized by a \texttt{weathersit} category of 3, the highest for weather anomaly.
+
+Outliers in the number of customers in the biking dataset were only found in \texttt{casual} customers as expected, with no outliers in the \texttt{registered} group and in the more general \texttt{cnt}.
+The analysis started by considering each attribute by itself. Inspecting them through statistical means.
+For each attribute the 5 number summary was considered and visualized through boxplots.
+Then the distribution of the most interesting attributed based on the regression task was visualized to better understand the possible skew on the data.
+To better understand the relationships and interplay between the features a heatmap and \texttt{seaborn}'s \texttt{pairplot} were used.
+These plots show different distributions:
+\begin{itemize}
+\item \texttt{hum} is a slightly positively skewed gaussian
+\item \texttt{windspeed} is a slightly negatively skewed gaussian
+\item \texttt{temp} is a bimodal distribution with two peaks approximately at 0.35 and 0.65
+\item \texttt{cnt} is a gaussian
+\end{itemize}
+Additionally the plot shows a positive relationship between \texttt{temp} and \texttt{cnt}.
+
+Attribute \texttt{instant} was removed as redundant to the task, \texttt{dteday} was converted to a simple integer \texttt{day} attribute.
+The \texttt{weathercond} attribute was found to be highly correlated to the target and during the optimization of the models was converted by one-hot encoding into the individual binary categories.
+
+Using scatterplots:
+\begin{itemize}
+\item \texttt{hum} was found to be only weakly inversely correlated to \texttt{cnt}
+\item \texttt{temp} was found to be directly correlated to \texttt{cnt}
+\item \texttt{windspeed} doesn't correlate to \texttt{cnt}
+\end{itemize}
+
+Using histograms to visualize the contributions of \texttt{registered} and \texttt{casual} customers to \texttt{cnt} the mean distribution through the day was a bimodal curve with peaks around hours 8-9 and 17-18 depending on the season.
+\texttt{casual} customers only contributed to 20\% of the total mean count.
+Considering the seasons the mean of the customers was highest in autumn and lowest in spring.
+
+Using the \texttt{lmplot} of \texttt{seaborn} to try and visualize a linear relationship between the weather conditions and \texttt{cnt} showed:
+\begin{itemize}
+\item a weakly inversely to non-existent relationship with \texttt{hum}
+\item a weak but unclear inverse relationship with \texttt{windspeed}
+\item a direct relationship with \texttt{temp}
+\item a clearly inverse relationship with the category \texttt{weathersit}
+\end{itemize}
+
+
+\section{Models}
+\label{sec:org3cd9679}
+The regression models tested were:
+\begin{itemize}
+\item a simple linear model
+\item a ridge model
+\item a lasso model
+\item an elastic net
+\item a random forest
+\end{itemize}
+
+They were trained on the same data, first on the day-to-day data and then for the hourly data.
+For reproducibility of the test seed \texttt{111} was used by the \texttt{train-test-split} function. The \texttt{test-set} was 20\% of the data.
+
+The features used for the training were most of them except for:
+\begin{itemize}
+\item \texttt{yr}, not important for the task
+\item \texttt{season}, as the same information is better modeled by \texttt{mnth}
+\item \texttt{registered}, as part of the target of the regression
+\item \texttt{casual}, same of \texttt{registered}
+\end{itemize}
+
+To allow the training the \texttt{dteday} attribute was converted to a simple \texttt{day} integer attribute.
+
+Then the models were tested again trying to improve performance.
+The following attribute was removed
+\begin{itemize}
+\item \texttt{atemp}, as the same information is modeled by \texttt{temp}
+\end{itemize}
+
+The categorical \texttt{weathersit} attribute was converted through the \texttt{pandas} function \texttt{get\_dummies} as one-hot encoding creating 3 binary features \texttt{weathersit-1}, \texttt{weathersit-2}, \texttt{weathersit-3}.
+
+Other attributes like \texttt{weekday} were tested through one-hot encoding but resulted in a slight lose in performance.
+
+The results were plotted to visualize the linearity assumption and to visualize the distribution compared to the test.
+\section{Conclusions}
+\label{sec:org0dca537}
+The \textbf{Random Forest} model proved to be the most effective at predicting the target (\texttt{cnt}) by far, followed by the simple Linear Model. This was the case both in the daily and hourly training.
+In the daily training all measures were closer between the models, with the hourly training the Random Forest outperformed all others by a large amount.
+One-hot encoding the \texttt{weathersit} attribute improved the prediction slightly reducing \texttt{MTE} but mainly in the Linear Model and in the case of the day-to-day training.
+Interestingly the hourly training, providing many more data points to the model, improved significantly all models on the \texttt{MSE} but only the Random Forest on the coefficient of determination.
+See tables 1 to 4 for the results.
+
+The same models could be trained using \texttt{casual} and \texttt{registered} attributes as targets to give further insight into the biking network.
+
+The results of such a regression model could be used to predict the most and least congested moments in the network, for example to plan maintenance.
+
+The data with the addition of coordinates in a city's biking network could provide interesting predictions on traffic and movement throughout the city.
+
+\pagebreak
+\fillbreak
+\begin{table}[htbp]
+\caption{Daily results}
+\centering
+\begin{tabular}{lrrrrr}
+ & Linear Model & Ridge Model & Lasso Model & Elastic Net & Random Forest\\[0pt]
+\hline
+MSE & 1919826 & 1938864 & 1925581 & 2988853 & 1469305\\[0pt]
+R2 & 0.53 & 0.52 & 0.52 & 0.26 & 0.64\\[0pt]
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Daily results optimized}
+\centering
+\begin{tabular}{lrrrrr}
+ & Linear Model & Ridge Model & Lasso Model & Elastic Net & Random Forest\\[0pt]
+\hline
+MSE & 1822903 & 1850090 & 1829576 & 3328053 & 1482230\\[0pt]
+R2 & 0.55 & 0.54 & 0.55 & 0.18 & 0.63\\[0pt]
+\end{tabular}
+\end{table}
+
+\pagebreak
+\begin{table}[htbp]
+\caption{Hourly results}
+\centering
+\begin{tabular}{lrrrrr}
+ & Linear Model & Ridge Model & Lasso Model & Elastic Net & Random Forest\\[0pt]
+\hline
+MSE & 20780 & 20782 & 20921 & 23581 & 1578\\[0pt]
+R2 & 0.39 & 0.39 & 0.39 & 0.31 & 0.95\\[0pt]
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Hourly results optimized}
+\centering
+\begin{tabular}{lrrrrr}
+ & Linear Model & Ridge Model & Lasso Model & Elastic Net & Random Forest\\[0pt]
+\hline
+MSE & 20753 & 20753 & 20861 & 24037 & 1554\\[0pt]
+R2 & 0.39 & 0.39 & 0.39 & 0.30 & 0.95\\[0pt]
+\end{tabular}
+\end{table}
+
+\fillbreak
+\end{document}
