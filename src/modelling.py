@@ -104,19 +104,24 @@ def plot_linearity_assumption(y_test, prediction, name, output_dir):
     df_lm = pd.DataFrame()
     df_lm['cnt_actual'] = y_test
     df_lm['cnt_predicted'] = prediction
-    sns.lmplot(data=df_lm, x='cnt_actual', y='cnt_predicted', fit_reg=False)
+    sns.lmplot(
+        data=df_lm,
+        x='cnt_actual', y='cnt_predicted',
+        fit_reg=False).set(title='Linearity assumption ' + name)
     # Plotting the diagonal line
     line_coords = np.arange(df_lm[['cnt_actual', 'cnt_predicted']].min().min()-10,
                             df_lm[['cnt_actual', 'cnt_predicted']].max().max()+10)
     plt.plot(line_coords, line_coords,  # X and y points
              color='darkorange', linestyle='--')
-    plt.savefig(output_dir + 'linearity_assumption-' + name + '.png')
+    plt.savefig(output_dir + 'linearity_assumption-' + name + '.png',
+                bbox_inches='tight')
     plt.clf()
 
 def plot_dist_predition(y_test, prediction, name, output_dir):
     df = pd.DataFrame()
     df['cnt_actual'] = y_test
     df['cnt_predicted'] = prediction
-    sns.displot(df, kind='kde')
-    plt.savefig(output_dir + 'distribution-' + name + '.png')
+    sns.displot(df, kind='kde').set(title='Predicted Distribution ' + name)
+    plt.savefig(output_dir + 'distribution-' + name + '.png',
+                bbox_inches='tight')
     plt.clf()
